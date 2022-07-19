@@ -18,8 +18,15 @@ class Searches {
         }
     }
 
-    async city(place = '') {
+    get paramsOpenWeather() {
 
+        return {
+            'appid': process.env.OPENWEATHER_KEY,
+            'units': 'metric'
+        }
+    }
+
+    async city(place = '') {
 
         try {
 
@@ -29,10 +36,12 @@ class Searches {
             });
 
             const response = await intance.get();
-
-            console.log(response.data);
-
-            return data;
+            return response.data.features.map(place => ({
+                id: place.id,
+                name: place.place_name,
+                lat: place.center[0],
+                lon: place.center[1]
+            }));
 
         } catch (error) {
 
@@ -41,6 +50,34 @@ class Searches {
 
     }
 
+    async cityWeather(lat, lon) {
+
+        try {
+            const intance = axios.create({
+                baseURL: `https://api.openweathermap.org/data/2.5/weather`,
+                params: {
+                    ...this.paramsOpenWeather,
+                    lat,
+                    lon
+                }
+            });
+
+            const response = await intance.get();
+            const { weather, main } = response.data;
+
+            return {
+                desc: weather[0].description,
+                min: main.temp_min,
+                max: main.temp_max,
+                temp: main.temp
+            }
+
+        } catch (error) {
+
+            return [];
+        }
+
+    }
 
 }
 
