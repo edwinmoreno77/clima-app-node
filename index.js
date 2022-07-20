@@ -26,8 +26,10 @@ const main = async () => {
                 const id = await listPlaces(cities);
                 const selectedCity = cities.find(city => city.id === id);
                 if (selectedCity) {
+
                     const weather = await searches.cityWeather(selectedCity.lat, selectedCity.lon);
 
+                    searches.addHistory(selectedCity.name);
                     //show result
                     console.clear();
                     console.log(' \ninformation about city:\n'.green);
@@ -41,9 +43,14 @@ const main = async () => {
                     console.log(' longitude:   ', selectedCity.lon);
                 }
 
+
                 break;
             case 2:
-                console.log('History');
+                searches.getHistory().forEach((city, i) => {
+                    const idx = `${i + 1}`.green;
+                    console.log(`${idx}. ${city}`);
+                });
+
                 break;
             case 0:
                 console.log('Bye');

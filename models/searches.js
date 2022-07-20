@@ -1,12 +1,32 @@
+import fs from 'fs';
 import axios from 'axios';
+
 
 
 class Searches {
 
-    history = ['Caracas', 'Antofagasta', 'Margarita', 'Ciudad Bolivar', 'Cabimas'];
+    history = [];
+
+    dbPath = './db/database.json';
 
     constructor() {
-        // read db if exists
+        this.readDB();
+    }
+
+    getHistory() {
+        //other way to get history
+
+        // let words = this.history.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        // return words;
+
+        return this.history.map(city => {
+
+            let words = city.split(' ');
+            words = words.map(p => p[0].toUpperCase() + p.substring(1));
+
+            return words.join(' ');
+        })
+
     }
 
     get paramsMapBox() {
@@ -76,6 +96,43 @@ class Searches {
 
             return [];
         }
+
+    }
+
+    addHistory(city) {
+
+        if (this.history.includes(city.toLocaleLowerCase())) {
+            return;
+        }
+
+        this.history = this.history.splice(0, 5);
+
+        this.history.unshift(city.toLocaleLowerCase());
+
+        this.saveDB();
+    }
+
+    saveDB() {
+
+        const payLoad = {
+            history: this.history
+        }
+
+        fs.writeFileSync(this.dbPath, JSON.stringify(payLoad));
+
+    }
+
+    readDB() {
+
+        if (!fs.existsSync(this.dbPath)) {
+            return null;
+        }
+
+        const info = fs.readFileSync(this.dbPath, { encoding: 'utf-8' });
+        const data = JSON.parse(info);
+        this.history = data.history;
+
+        return this.history;
 
     }
 
